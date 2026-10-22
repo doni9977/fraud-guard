@@ -118,7 +118,8 @@ The system follows a modular microservice-inspired architecture, separating clie
 ├── config/
 │   └── .env.example          # Template environment variable configuration
 ├── diagrams/
-│   └── exports/              # Architectural diagrams, UML schemas, and workflow graphics
+│   ├── source/               # Editable Mermaid diagram sources
+│   └── exports/              # Generated diagram exports
 ├── docs/                     # Diploma documentation, requirements specs, and academic reports
 ├── src/
 │   ├── backend/              # Go RESTful API service (Gin framework, database migrations)
@@ -165,3 +166,16 @@ The implementation is currently at the analysis and design stage. Run commands w
 - **Project Documentation**: Available in [`/docs`](./docs)
 - **Architecture Diagrams**: Available in [`/diagrams`](./diagrams)
 - **Issue & Task Tracking (YouTrack)**: The project board will be linked after it is created.
+
+### Architecture Diagrams (Pre-Defense 1 Deliverable)
+
+The platform architecture is formally modeled across six diagrams. Editable Mermaid sources are stored in [`diagrams/source`](./diagrams/source) and can be exported to PNG or SVG when presentation files are needed:
+
+| # | Diagram | Description | Source and exports | Requirements |
+|---|---|---|---|---|
+| 1 | **System Context Diagram** | Platform as one system, people and external systems around it | [Source](./diagrams/source/system-context.md) · [SVG](./diagrams/exports/system-context.svg) · [PNG](./diagrams/exports/system-context.png) | FR-1, FR-5, FR-11, FR-12, NFR-5 |
+| 2 | **Use Case Diagram** | Actors and use cases UC-01–UC-10 | [Source](./diagrams/source/use-case.md) · [SVG](./diagrams/exports/use-case.svg) · [PNG](./diagrams/exports/use-case.png) | FR-1–FR-8, FR-11, FR-12 |
+| 3 | **Component Diagram** | Frontend, Go, Python, and PostgreSQL components | [Source](./diagrams/source/component-diagram.md) · [SVG](./diagrams/exports/component-diagram.svg) · [PNG](./diagrams/exports/component-diagram.png) | FR-1–FR-7, FR-11, FR-12, NFR-4 |
+| 4 | **Data Flow Diagram** | Web and external channel message processing | [Source](./diagrams/source/data-flow.md) · [SVG](./diagrams/exports/data-flow.svg) · [PNG](./diagrams/exports/data-flow.png) | FR-1, FR-2, FR-3, FR-4, FR-11 |
+| 5 | **Sequence Diagram** | Request-response flow across services | [Source](./diagrams/source/sequence-diagram.md) · [SVG](./diagrams/exports/sequence-diagram.svg) · [PNG](./diagrams/exports/sequence-diagram.png) | FR-1, FR-2, FR-3, FR-4, NFR-1 |
+| 6 | **ER Diagram** | PostgreSQL entities, relationships, and privacy fields | [Source](./diagrams/source/er-diagram.md) · [SVG](./diagrams/exports/er-diagram.svg) · [PNG](./diagrams/exports/er-diagram.png) | FR-2, FR-4, FR-6, FR-7, FR-11, NFR-6 |
