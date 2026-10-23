@@ -7,8 +7,8 @@
   - **Marat Danial Samaluly** — Backend Developer, DevOps Engineer
   - **Abdikasym Nurbakyt Narimanuly** — ML Engineer, Frontend Developer
 - **Academic Supervisor:** Konstantin Latuta
-- **Document Version:** 1.0.0 (Pre-Defense Submission, October 2024)
-- **Status:** Approved / Baselined
+- **Document Version:** 1.0 (Pre-defense 1, October 2026)
+- **Status:** Draft, to be reviewed with the supervisor
 
 ---
 
@@ -18,14 +18,16 @@ The engineering of an intelligent, high-throughput fraud detection platform nece
 
 Each technical decision is evaluated against multi-dimensional criteria derived from functional requirements, non-functional performance benchmarks, developmental constraints, operational costs, and team proficiencies.
 
+> Latency, memory and size figures in the tables are approximate orders of magnitude taken from library documentation and typical deployments. They are not our own measurements; the real values will be measured during implementation (see the verification plan).
+
 ### Master Decision Matrix
 
 | Domain | Evaluated Alternatives | Selected Solution | Primary Strategic Justification |
 | :--- | :--- | :--- | :--- |
 | **1. Backend Framework** | Go (Gin), Node.js (Express), Python (FastAPI) | **Go (Gin)** | Sub-millisecond routing latency, minimal memory footprint (<30 MB), native goroutine concurrency, single static binary deployment, and strong team proficiency. |
 | **2. Database** | PostgreSQL, MongoDB, MySQL | **PostgreSQL** | Strict ACID transactional integrity for user data and audit trails, powerful semi-structured `JSONB` support for ML feature payloads, and built-in full-text search. |
-| **3. ML Framework** | scikit-learn, TensorFlow / Keras, PyTorch | **scikit-learn** *(with Hugging Face Transformers)* | Rapid baseline prototyping, low-resource CPU inference, broad classical ML algorithm suite, seamless transition to Hugging Face for transformer fine-tuning. |
-| **4. NLP Approach** | TF-IDF + Classical ML, Pre-trained BERT, Word2Vec + BiLSTM | **TF-IDF + Classical ML** *(Baseline)* $\rightarrow$ **DistilBERT** *(Evaluation)* | Staged evolutionary methodology: immediate explainable token attribution and high-speed baseline, followed by deep contextual semantic fine-tuning. |
+| **3. ML Framework** | scikit-learn, TensorFlow / Keras, PyTorch | **scikit-learn** | Rapid baseline prototyping, low-resource CPU inference, broad classical ML algorithm suite, transformer models possible later as an optional experiment. |
+| **4. NLP Approach** | TF-IDF + Classical ML, Pre-trained BERT, Word2Vec + BiLSTM | **TF-IDF + Classical ML** | Explainable token weights, fast CPU inference, small model; DistilBERT only as an optional comparison. |
 | **5. Frontend Framework** | React (TypeScript), Vue.js, Angular | **React (TypeScript)** | Industry-standard declarative component model, strict end-to-end type safety, expansive ecosystem (Tailwind CSS, Lucide, Radix UI), and proven team competence. |
 | **6. Backend Hosting** | Render, Railway, AWS EC2 | **Render** | Generous free tier for containerized services and managed PostgreSQL, native GitOps CI/CD integration, automated SSL, and zero server maintenance overhead. |
 | **7. Frontend Hosting** | Vercel, Netlify, Cloudflare Pages | **Vercel** | Specialized optimization for React/Vite builds, instantaneous preview deployments on pull requests, edge CDN delivery, and zero-configuration setups. |
@@ -120,11 +122,11 @@ The machine learning component is the analytical core of the platform, tasked wi
 | **NLP Transformer Integration** | Complementary with Hugging Face tokenizers | Hugging Face integration (`TFAutoModel`) | First-class citizen in Hugging Face ecosystem (`AutoModelForSequenceClassification`) |
 
 ### 3.4 Justification
-**Selected Alternative: scikit-learn (as the Primary Engine), augmented with Hugging Face Transformers for BERT evaluation.**
+**Selected Alternative: scikit-learn as the primary engine. A transformer model (DistilBERT via Hugging Face) is an optional later experiment, only if time and resources allow.**
 
-For the development of the fraud message detection platform, scikit-learn offers the most pragmatic, reliable, and mathematically transparent foundation. In academic anti-phishing research, classical machine learning algorithms—specifically Multinomial Naive Bayes, Logistic Regression, Support Vector Classifiers (Linear SVC), and Random Forest Ensembles—consistently demonstrate remarkable performance ($F_1\text{-score} \ge 0.90$) on text classification benchmarks while requiring orders of magnitude less training time and computational overhead than deep neural networks.
+For the development of the fraud message detection platform, scikit-learn offers the most pragmatic, reliable, and mathematically transparent foundation. In academic anti-phishing research, classical machine learning algorithms—specifically Multinomial Naive Bayes, Logistic Regression, Support Vector Classifiers (Linear SVC), and Random Forest Ensembles—show strong results on SMS spam and phishing benchmarks in the reviewed literature (e.g., Almeida et al., 2011; see the literature review) while requiring orders of magnitude less training time and computational overhead than deep neural networks.
 
-Using scikit-learn enables the team to construct fully encapsulated, serializable pipelines combining string preprocessing, n-gram vectorization, and classifier estimators into a single callable artifact via `joblib`. Its ultra-compact memory footprint (<100 MB during serving) ensures that the inference microservice operates comfortably within low-cost or free-tier container limits without experiencing Out-Of-Memory (OOM) termination. For secondary comparative research, Hugging Face Transformers (utilizing a PyTorch execution backend) will be leveraged during offline experimental phases to fine-tune DistilBERT, evaluating whether deep contextual embeddings offer statistically significant improvements over the optimized scikit-learn baseline.
+Using scikit-learn enables the team to construct fully encapsulated, serializable pipelines combining string preprocessing, n-gram vectorization, and classifier estimators into a single callable artifact via `joblib`. Its ultra-compact memory footprint (<100 MB during serving) ensures that the inference microservice operates comfortably within low-cost or free-tier container limits without experiencing Out-Of-Memory (OOM) termination. For secondary comparative research, Hugging Face Transformers (utilizing a PyTorch execution backend) may be used in an optional offline experiment to fine-tune DistilBERT and check whether deep contextual embeddings offer statistically significant improvements over the optimized scikit-learn baseline.
 
 ---
 
@@ -151,14 +153,14 @@ Phishing and fraudulent text messages (e.g., smishing, social engineering, fake 
 | **Typo & Obfuscation Resilience** | High when utilizing character-level n-grams (e.g., 3-to-5-grams) | High via WordPiece / Byte-Pair subword tokenization | Low for out-of-vocabulary (OOV) tokens unless fastText is used |
 
 ### 4.4 Justification
-**Selected Alternative: Staged Hybrid Approach — Baseline with TF-IDF + Classical Classifiers, followed by DistilBERT Fine-Tuning Evaluation.**
+**Selected Alternative: TF-IDF + classical classifiers as the production approach. DistilBERT fine-tuning is an optional comparison experiment.**
 
 In accordance with rigorous academic methodology, establishing a reproducible, high-performing baseline is mandatory prior to deploying complex deep learning architectures. The TF-IDF representation combined with a linear Support Vector Classifier or Logistic Regression model serves as the primary production engine for Phase 1. 
 
 This decision is motivated by three compelling engineering factors:
 1. **Explainability and User Education:** The primary objective of the platform is not merely binary classification, but fraud prevention. Linear models combined with TF-IDF provide direct mathematical interpretability: top feature weights directly indicate the exact unigrams and bigrams (e.g., *"account suspended"*, *"verify immediately"*, *"wire transfer"*) that contributed to the malicious classification score, enabling the frontend to highlight hazardous phrases directly for the user.
 2. **Zero-Latency CPU Serving:** The inference process executes in under 5 milliseconds on a single vCPU, eliminating latency bottlenecks and avoiding the high costs of cloud GPU provisioning.
-3. **Empirical Baseline Validation:** In subsequent experimental phases, team member Nurbakyt Abdikasym will fine-tune a pre-trained DistilBERT model. If DistilBERT achieves a statistically significant margin in $F_1\text{-score}$ without exceeding container memory ceilings, its ONNX-quantized version will be transitioned to production.
+3. **Empirical Baseline Validation:** If time allows after the baseline is finished, Nurbakyt Abdikasym may fine-tune a pre-trained DistilBERT model as a comparison. It would replace the baseline only if it gives a clear F1 improvement on the same test split and fits into the container memory limits.
 
 ---
 
@@ -279,7 +281,7 @@ The system architecture separates the high-performance Go API gateway from the P
 ### 8.4 Justification
 **Selected Alternative: Synchronous RESTful HTTP / JSON.**
 
-For Phase 1 of the diploma platform, Synchronous REST over HTTP/JSON is selected as the primary inter-service communication protocol. Given that end users expect immediate, real-time feedback upon submitting a suspicious message (target end-to-end response time under 500 ms), an asynchronous broker pattern introduces unnecessary architectural complexity, message queuing delay, and extra infrastructure dependencies (e.g., managing a Redis or RabbitMQ container within strict cloud hosting budgets).
+For Phase 1 of the diploma platform, Synchronous REST over HTTP/JSON is selected as the primary inter-service communication protocol. Given that end users expect immediate, real-time feedback upon submitting a suspicious message (target server-side processing time ≤ 2 s at p95, NFR-1), an asynchronous broker pattern introduces unnecessary architectural complexity, message queuing delay, and extra infrastructure dependencies (e.g., managing a Redis or RabbitMQ container within strict cloud hosting budgets).
 
 Between REST and gRPC, while gRPC offers superior binary serialization efficiency, RESTful HTTP/JSON provides clear developer velocity benefits:
 1. **Universal Inspectability:** Inbound and outbound payloads can be intercepted, logged, and validated using standard developer tools, cURL, and Postman, greatly accelerating integration debugging between Danial (Go backend) and Nurbakyt (Python ML service).
@@ -313,6 +315,6 @@ The selected technologies coalesce into a coherent, decoupled, and resilient thr
 3. **Persistence Tier:** Structured records and flexible model output artifacts are persisted in a managed **PostgreSQL** instance with full ACID guarantees.
 4. **Inference Tier:** When a message requires evaluation, the Go gateway dispatches an internal REST request to the **Python inference service**, which executes the **scikit-learn** pipeline (TF-IDF vectorization and classifier scoring), returning risk ratings and explainability tokens in milliseconds.
 
-4. **Channel Integration Tier:** A normalized REST ingestion endpoint accepts messages from the planned SMS companion application, Telegram bot, or local test adapter. The web interface remains independent and is the guaranteed MVP path.
+5. **Channel Integration Tier:** A normalized REST ingestion endpoint accepts messages from the planned SMS companion application, Telegram bot, or local test adapter. The web interface remains independent and is the guaranteed MVP path.
 
 This technology stack satisfies the core functional requirements, leaves a controlled extension path for SMS and Telegram integrations, adheres to university pre-defense quality standards, eliminates unnecessary operational expenses, and aligns directly with the established competencies of the development team.
