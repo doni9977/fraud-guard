@@ -165,7 +165,7 @@ The implementation is currently at the analysis and design stage. Run commands w
 
 - **Project Documentation**: Available in [`/docs`](./docs)
 - **Architecture Diagrams**: Available in [`/diagrams`](./diagrams)
-- **Issue & Task Tracking (YouTrack)**: The project board will be linked after it is created.
+- **Issue & Task Tracking (YouTrack)**: [fg-diploma.youtrack.cloud/projects/DIP](https://fg-diploma.youtrack.cloud/projects/DIP)
 
 ### Architecture Diagrams (Pre-Defense 1 Deliverable)
 
