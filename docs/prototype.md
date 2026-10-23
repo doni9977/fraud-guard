@@ -134,28 +134,54 @@ Detailed interactive prototype with:
 
 ## 6. API Interface (for programmatic access)
 
-### Request Example
+The examples below show the planned contract. The response values are illustrative, not model output.
+
+### Analyze a message from the web form
 ```json
 POST /api/v1/analyze
 Content-Type: application/json
 
 {
-  "message": "Congratulations! You've won a $1000 gift card. Click here to claim: http://suspicious-link.com",
-  "language": "en"
+  "message": "Congratulations! You've won a $1000 gift card. Click here to claim: http://suspicious-link.example",
+  "language": "en",
+  "source": "web"
 }
 ```
 
-### Response Example
 ```json
 {
   "id": "a1b2c3d4",
   "classification": "fraudulent",
   "confidence": 0.94,
+  "risk_level": "high",
   "indicators": [
-    {"type": "urgency", "text": "Congratulations!", "weight": 0.3},
-    {"type": "financial_lure", "text": "$1000 gift card", "weight": 0.35},
-    {"type": "suspicious_url", "text": "http://suspicious-link.com", "weight": 0.29}
+    {"type": "reward_or_prize", "title": "Prize or reward", "evidence": "$1000 gift card", "severity": "high"},
+    {"type": "suspicious_url", "title": "Suspicious link", "evidence": "http://suspicious-link.example", "severity": "high"},
+    {"type": "urgency", "title": "Urgency language", "evidence": "Click here to claim", "severity": "medium"}
   ],
-  "analyzed_at": "2026-10-19T12:00:00Z"
+  "warning": {
+    "show": true,
+    "title": "High-risk message detected",
+    "text": "Do not open links or share personal information."
+  },
+  "source": "web",
+  "model_version": "baseline-0.1",
+  "processing_time_ms": 120
 }
 ```
+
+### Message from an external channel
+```json
+POST /api/v1/messages/ingest
+Content-Type: application/json
+
+{
+  "message_id": "tg-000123",
+  "source": "telegram",
+  "text": "Your account will be blocked today. Send the code from SMS.",
+  "language": "en",
+  "received_at": "2026-10-22T12:00:00Z"
+}
+```
+
+The response has the same fields as `/api/v1/analyze`. Sending the same `source` and `message_id` again returns the existing analysis instead of creating a new one.
