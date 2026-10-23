@@ -97,13 +97,15 @@ If a real adapter cannot be completed because of platform permissions or schedul
 ```
 
 ## 5. Figma Prototype
-> **Link**: [TO BE CREATED - Figma prototype link will be added here]
+> **Link**: https://text-wispy-10186308.figma.site/
 
-Detailed interactive prototype with:
-- Color scheme and typography
-- Component states (loading, error, success)
-- Responsive layouts (desktop, tablet, mobile)
-- Navigation flow between pages
+Interactive prototype made in Figma. The main screen covers the key scenarios:
+- **Overview:** number of analysed messages, high-risk messages, average confidence and connected sources
+- **Quick analysis (UC-01):** message field with a 10,000 character limit, language selection (auto-detect, English, Russian, Kazakh) and the *Analyze message* button
+- **Recent analyses (UC-02, UC-03):** latest results with source, short preview, risk label and confidence, and a link to the full history
+- **Safety reminder:** short advice shown to the user
+
+The numbers on the screens are demo values for the layout, not real statistics or model results.
 
 ### 5.1 Connected Sources
 ```
