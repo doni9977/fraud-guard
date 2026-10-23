@@ -2,7 +2,7 @@
 
 ## Abstract
 
-Digital communication channels—including short message services (SMS), electronic mail, and Telegram—have increasingly become primary attack vectors for social engineering, smishing, and phishing campaigns. Defending users against these deceptive tactics requires robust automated verification systems. This document provides an academic and technical comparative evaluation of five prominent state-of-the-art systems: Google Safe Browsing, PhishTank, Kaspersky Anti-Phishing, ScamAdviser, and Apache SpamAssassin. Each system is evaluated across ten rigorous criteria encompassing algorithmic capability, deployment accessibility, multilingual adaptability (specifically within the Central Asian context, including Kazakh and Russian languages), and user interpretability. The analysis reveals significant functional gaps in current solutions—notably their disproportionate focus on URL blacklists rather than conversational text semantics, absence of user-centric explainability, and neglect of regional multilingual environments. Based on these findings, we present a structured justification for the proposed intelligent anti-scam web platform.
+Digital communication channels—including short message services (SMS), electronic mail, and Telegram—have increasingly become primary attack vectors for social engineering, smishing, and phishing campaigns. Defending users against these deceptive tactics requires robust automated verification systems. This document provides an academic and technical comparative evaluation of five systems: Google Safe Browsing, Google Messages Scam Detection, Kaspersky Anti-Phishing, Bitdefender Scamio, and Apache SpamAssassin. Two of them (Google Messages and Scamio) analyse message text directly; the other three represent URL reputation, commercial endpoint protection and open-source email filtering. Each system is evaluated across ten rigorous criteria encompassing algorithmic capability, deployment accessibility, multilingual adaptability (specifically within the Central Asian context, including Kazakh and Russian languages), and user interpretability. The analysis shows that tools which analyse text are closed, have no public API and do not document support for Kazakh or Russian, while open tools are limited to email or URLs. Based on these findings, we present a structured justification for the proposed intelligent anti-scam web platform.
 
 ---
 
@@ -52,7 +52,7 @@ The systems under review are evaluated across ten multi-dimensional criteria ref
 ### 3.1. Google Safe Browsing
 
 #### System Overview
-Google Safe Browsing is an industry-standard threat intelligence service developed by Google that enables client applications to check URLs against continuously updated lists of suspected phishing, social engineering, and malware-hosting web resources. It powers the native security warnings in web browsers such as Google Chrome, Mozilla Firefox, and Apple Safari, protecting billions of devices globally.
+Google Safe Browsing is an industry-standard threat intelligence service developed by Google that enables client applications to check URLs against continuously updated lists of suspected phishing, social engineering, and malware-hosting web resources. It powers the security warnings in browsers such as Google Chrome, Mozilla Firefox and Apple Safari [1].
 
 #### Capabilities and Strengths
 - **Global Telemetry and Speed:** Backed by Google’s web-scale crawling and indexing infrastructure, providing instantaneous hash-based client lookups with minimal latency and high availability.
@@ -69,53 +69,53 @@ Google Safe Browsing is an industry-standard threat intelligence service develop
 - **C2: Use of Machine Learning:** ✅ Full support. Employs advanced machine learning models internally within Google's crawl and detection pipelines.
 - **C3: Open-source availability:** ❌ No support. Proprietary closed-source infrastructure.
 - **C4: Multilingual support:** ⚠️ Partial support. While landing page content is analyzed globally, message text comprehension in regional languages (Kazakh/Russian) is not offered as an input service.
-- **C5: Free to use:** ✅ Full support. Free API quotas are available for non-commercial and general public safety implementations.
-- **C6: API for integration:** ✅ Full support. High-performance REST and gRPC interfaces with official SDKs across major languages.
-- **C7: Real-time analysis:** ✅ Full support. Sub-millisecond response times enabled by 32-bit hash prefix matching and local database synchronization.
+- **C5: Free to use:** ⚠️ Partial support. The Safe Browsing API is free for non-commercial use only; commercial use requires the paid Web Risk API [1].
+- **C6: API for integration:** ✅ Full support. REST and RPC APIs (v4 and v5) [1].
+- **C7: Real-time analysis:** ✅ Full support. Lookups use locally synchronised hash prefixes, so most checks need no network request.
 - **C8: Explainability of results:** ⚠️ Partial support. Returns only broad threat labels; no granular reasoning or linguistic feature attribution is provided.
 - **C9: User-friendly web interface:** ⚠️ Partial support. Provides a simple transparency report search bar for site owners, but lacks an interactive diagnostic portal for general message inspection.
 - **C10: Support for multiple message types:** ❌ No support. Strictly limited to URL endpoints; cannot parse SMS, email headers, or messenger chats.
 
 ---
 
-### 3.2. PhishTank (Cisco)
+### 3.2. Google Messages Scam Detection
 
 #### System Overview
-PhishTank is an open, collaborative clearinghouse and community-driven verification platform for phishing data, operated by Cisco Talos. It allows users and security analysts worldwide to submit suspect URLs, conduct peer reviews to validate phishing sites, and track historical scam records.
+Scam Detection is a feature of the Google Messages application on Android, announced in March 2025 [2]. On-device AI models check SMS, MMS and RCS conversations with non-contacts for patterns typical of conversational scams (for example, a harmless first message that later turns into a request for money or personal data) and show a warning in the chat.
 
 #### Capabilities and Strengths
-- **Crowdsourced Intelligence:** Harnesses human peer review to validate emerging phishing campaigns, providing high confidence for verified submissions.
-- **Open Data Feeds:** Distributes phishing feeds in structured formats (XML, JSON, CSV) accessible to researchers, network administrators, and open-source tooling.
-- **Free Developer Access:** Offers straightforward RESTful API access for automated URL queries and batch lookups without prohibitive licensing fees.
+- **Text-based detection:** Works on the message content itself, so it can flag scams that contain no link at all.
+- **On-device processing:** According to Google, message processing stays on the phone; data is shared only when the user decides to report the conversation [2].
+- **Integrated warning:** The user sees the warning inside the conversation and can dismiss it or report and block the sender.
 
 #### Limitations
-- **Human Verification Latency:** The peer-review model introduces significant delays (ranging from minutes to hours), making it inadequate for mitigating zero-hour attacks before first-strike damage occurs.
-- **Absence of Text Processing:** Only accepts web URLs; cannot process conversational context, SMS payloads, or email message bodies.
-- **No Machine Learning Inference:** Relies almost exclusively on manual human votes and basic signature tracking rather than predictive NLP or automated semantic classifiers.
+- **Limited availability:** At launch the feature covered English-language users in the United States, the United Kingdom and Canada [2]. Russian and Kazakh are not mentioned.
+- **Single channel:** Only works for messages received in Google Messages on Android; text from Telegram, email or iOS cannot be checked.
+- **No explanation or API:** Public sources describe a warning and actions, but no breakdown of why the message was flagged and no interface for other applications.
 
 #### Criteria Assessment
-- **C1: Text message analysis:** ❌ No support. Ingests and reviews URLs only.
-- **C2: Use of Machine Learning:** ❌ No support. Verification relies on crowdsourced manual voting and static rule matching.
-- **C3: Open-source availability:** ❌ No support. While the data feed is open, the underlying portal and verification infrastructure are proprietary Cisco software.
-- **C4: Multilingual support:** ❌ No support. Community interface and operational guidelines are strictly English-centric.
-- **C5: Free to use:** ✅ Full support. Entirely free for individual lookup, community voting, and research data export.
-- **C6: API for integration:** ✅ Full support. Simple HTTP REST API allowing URL check and submission queries.
-- **C7: Real-time analysis:** ⚠️ Partial support. Database lookups for indexed URLs are immediate; however, novel submissions cannot be verified in real time without community voting.
-- **C8: Explainability of results:** ⚠️ Partial support. Provides screenshots of the submitted target page and community vote counts, but offers no linguistic or contextual rationale.
-- **C9: User-friendly web interface:** ⚠️ Partial support. Functional web portal exists, but the user experience is dated, complex, and oriented toward security practitioners rather than everyday users.
-- **C10: Support for multiple message types:** ❌ No support. Only accepts individual web URLs.
+- **C1: Text message analysis:** ✅ Full support. Analyses the text of SMS/RCS conversations.
+- **C2: Use of Machine Learning:** ✅ Full support. On-device AI models [2].
+- **C3: Open-source availability:** ❌ No support. Proprietary.
+- **C4: Multilingual support:** ❌ No support. English only at launch; no Russian or Kazakh.
+- **C5: Free to use:** ✅ Full support. Free for users of the application.
+- **C6: API for integration:** ❌ No support. No public API is documented.
+- **C7: Real-time analysis:** ✅ Full support. Warnings appear while the conversation is happening.
+- **C8: Explainability of results:** ⚠️ Partial support. A warning is shown; detailed reasons are not documented.
+- **C9: User-friendly web interface:** ❌ No support. Mobile application only, no web interface for checking an arbitrary message.
+- **C10: Support for multiple message types:** ⚠️ Partial support. SMS, MMS and RCS only.
 
 ---
 
 ### 3.3. Kaspersky Anti-Phishing
 
 #### System Overview
-Kaspersky Anti-Phishing is a proprietary security technology integrated into Kaspersky’s commercial endpoint protection, mail gateway, and mobile security suites. It combines local signature heuristics with cloud-based intelligence via the Kaspersky Security Network (KSN) to identify sophisticated phishing attacks and social engineering ploys.
+Kaspersky Anti-Phishing is a proprietary security technology integrated into Kaspersky’s commercial endpoint protection, mail gateway, and mobile security suites. It combines local heuristics with cloud-based intelligence from the Kaspersky Security Network (KSN) [3].
 
 #### Capabilities and Strengths
-- **Multi-Layered Threat Intelligence:** Leverages a vast global telemetry network, deep neural networks, image recognition (for spoofed login portals), and behavioral heuristics.
-- **Strong Post-Soviet & Russian Threat Coverage:** Demonstrates exceptional detection accuracy for threats originating in or targeting the Commonwealth of Independent States (CIS) and Eastern Europe.
-- **Endpoint and Protocol Coverage:** Monitors inbound traffic across mail clients (POP3/IMAP/SMTP), web traffic (HTTP/HTTPS), and mobile SMS interception on supported operating systems.
+- **Cloud threat intelligence:** KSN collects data from users' devices and uses machine learning to react quickly to new threats [3].
+- **Tested phishing protection:** In the 2025 AV-Comparatives anti-phishing test Kaspersky Premium detected 93% of phishing URLs and received the "Approved" certificate [6].
+- **Wide coverage:** Protects web browsing and email in desktop, mobile and mail-gateway products.
 
 #### Limitations
 - **Closed Commercial Ecosystem:** Requires commercial software licensing; proprietary algorithms and source code are strictly guarded.
@@ -124,51 +124,52 @@ Kaspersky Anti-Phishing is a proprietary security technology integrated into Kas
 
 #### Criteria Assessment
 - **C1: Text message analysis:** ⚠️ Partial support. Analyzes text within dedicated email/SMS filter modules of commercial suites, but not as an open standalone text analyzer.
-- **C2: Use of Machine Learning:** ✅ Full support. Deep learning models, NLP classifiers, and computer vision algorithms are deeply embedded in KSN.
+- **C2: Use of Machine Learning:** ✅ Full support. KSN uses machine learning on cloud telemetry [3].
 - **C3: Open-source availability:** ❌ No support. Fully proprietary commercial intellectual property.
-- **C4: Multilingual support:** ⚠️ Partial support. Extensive support for Russian and European languages; however, formal linguistic modeling and dedicated tokenizers for the Kazakh language remain scarce.
+- **C4: Multilingual support:** ⚠️ Partial support. Products are localised into Russian and many other languages; public sources do not describe text analysis for Kazakh.
 - **C5: Free to use:** ❌ No support. Enterprise and consumer software requires paid subscription licensing.
 - **C6: API for integration:** ⚠️ Partial support. Threat Intelligence Portal APIs exist, but access is restricted to paid enterprise tiers under specialized agreements.
 - **C7: Real-time analysis:** ✅ Full support. High-speed local heuristics combined with cloud telemetry deliver real-time verdicts.
 - **C8: Explainability of results:** ⚠️ Partial support. Alerts categorise the attack type, but offer no semantic deconstruction or educational explanation for user literacy.
 - **C9: User-friendly web interface:** ⚠️ Partial support. Management is conducted via desktop client or enterprise administrator consoles; no public web playground for ad-hoc user text verification.
-- **C10: Support for multiple message types:** ⚠️ Partial support. Supports email and mobile SMS when fully installed as an OS agent, but cannot handle arbitrary copy-pasted instant messaging conversations in a standalone manner.
+- **C10: Support for multiple message types:** ⚠️ Partial support. Covers web traffic and email inside installed products; an arbitrary copied messenger text cannot be checked on its own.
 
 ---
 
-### 3.4. ScamAdviser
+### 3.4. Bitdefender Scamio
 
 #### System Overview
-ScamAdviser is a widely recognized web-based platform dedicated to evaluating the trustworthiness and legitimacy of commercial websites and online services. Utilizing an automated multi-factor scoring algorithm (the "Trustscore"), ScamAdviser assesses over forty technical attributes, domain history, consumer reviews, and external blacklists to determine fraud probability.
+Scamio is a free AI chatbot by Bitdefender for checking suspicious content [4]. The user pastes a text, email or social media message, sends a link or QR code, uploads a screenshot or simply describes the situation, and Scamio answers whether it looks like a scam and gives advice. It is available as a web chat and in WhatsApp, Facebook Messenger and Discord.
 
 #### Capabilities and Strengths
-- **Multi-Factor Domain Profiling:** Evaluates domain age, SSL certificate validity, registrar integrity, geographical server location, presence on malicious lists, and consumer sentiment.
-- **Highly Transparent Scoring Breakdown:** Generates a 1–100 Trustscore accompanied by detailed positive and negative trust indicators, making the verdict understandable to consumer audiences.
-- **Consumer-Centric Web Interface:** Delivers an intuitive, visually clear interface featuring gauge meters, color-coded summaries, and security recommendations.
+- **Closest to our use case:** Accepts free text from any channel, not only URLs.
+- **Several entry points:** Web chat and popular messengers.
+- **Advice for the user:** The answer contains a verdict and tips on what to do next.
 
 #### Limitations
-- **Domain/Host Dependent:** Incapable of evaluating conversational text messages or communication content that does not reference a hosted domain.
-- **Susceptible to Legitimate Infrastructure Exploitation:** If a scammer hosts a phishing form on legitimate cloud services (e.g., Google Forms, Canva, Notion, Firebase), ScamAdviser assigns a high trust score based on the reputable domain, failing to detect malicious intent.
-- **Limited Natural Language Intelligence:** Does not possess NLP models for inspecting conversational context, urgency triggers, or scam psychology in textual communications.
+- **Closed system:** The models, rules and Bitdefender's scam database are proprietary; the decision process cannot be audited [4].
+- **Account required:** The user has to sign in with a Bitdefender account before the first check [4].
+- **Unclear language coverage:** The product page does not state which languages are supported; Kazakh is not mentioned.
+- **No public API:** No interface for integration into other applications is described.
 
 #### Criteria Assessment
-- **C1: Text message analysis:** ❌ No support. Operates strictly on domains and web hosts.
-- **C2: Use of Machine Learning:** ⚠️ Partial support. Employs statistical rule-based scoring and regression models on domain metadata; lacks deep NLP text classification models.
-- **C3: Open-source availability:** ❌ No support. Proprietary commercial scoring algorithm and database.
-- **C4: Multilingual support:** ⚠️ Partial support. Multi-language web UI localization; however, the algorithmic analysis is domain-metadata driven rather than linguistic.
-- **C5: Free to use:** ⚠️ Partial support. Free web searches for individual users; API queries and bulk inspections require paid commercial tiers.
-- **C6: API for integration:** ✅ Full support. Offers a comprehensive commercial REST API returning structured JSON trust attributes.
-- **C7: Real-time analysis:** ✅ Full support. Real-time querying and rapid algorithmic calculation for submitted domains.
-- **C8: Explainability of results:** ✅ Full support. Provides detailed itemized lists of risk factors (e.g., "Domain created recently", "Hidden registrar identity", "SSL certificate valid").
-- **C9: User-friendly web interface:** ✅ Full support. Modern, responsive, and intuitive interface explicitly designed for everyday consumers.
-- **C10: Support for multiple message types:** ❌ No support. Restricted solely to web domains and URLs.
+- **C1: Text message analysis:** ✅ Full support. Accepts any text, links, QR codes and screenshots.
+- **C2: Use of Machine Learning:** ✅ Full support. Described as AI-powered; also uses rules and a database of known scams [4].
+- **C3: Open-source availability:** ❌ No support. Proprietary.
+- **C4: Multilingual support:** ⚠️ Partial support. Language support is not documented; no information about Kazakh.
+- **C5: Free to use:** ✅ Full support. Free, but requires a Bitdefender account.
+- **C6: API for integration:** ❌ No support. No public API.
+- **C7: Real-time analysis:** ✅ Full support. Answers within a chat session.
+- **C8: Explainability of results:** ⚠️ Partial support. Gives a verdict and tips; the level of detail of the reasons is not documented.
+- **C9: User-friendly web interface:** ✅ Full support. Chat interface in the browser.
+- **C10: Support for multiple message types:** ✅ Full support. Text, email, social media messages, links, QR codes and screenshots.
 
 ---
 
 ### 3.5. Apache SpamAssassin
 
 #### System Overview
-Apache SpamAssassin is a mature, highly extensible open-source anti-spam platform released under the Apache License 2.0. Widely integrated into Unix mail transfer agents (MTAs) such as Postfix, Exim, and Sendmail, it processes incoming email streams using an extensive matrix of heuristic rules, DNS-based blocklists, and Bayesian statistical filtering.
+Apache SpamAssassin is a mature, highly extensible open-source anti-spam platform released under the Apache License 2.0. Widely integrated into Unix mail transfer agents (MTAs) such as Postfix, Exim, and Sendmail, it processes incoming email using heuristic rules, DNS-based blocklists and Bayesian filtering [5].
 
 #### Capabilities and Strengths
 - **Granular Heuristic Rule Engine:** Evaluates RFC 5322 email headers, MIME structures, and message body text against thousands of community and customized heuristic rules.
@@ -196,175 +197,150 @@ Apache SpamAssassin is a mature, highly extensible open-source anti-spam platfor
 
 ## 4. Comprehensive Comparative Matrix
 
-The following matrix synthesizes the evaluation across all five existing systems alongside the **Proposed Intelligent Scam Detection Platform**, clearly illustrating the feature coverage and operational focus of each solution:
+The matrix summarises the assessment of the five existing systems. The last column shows the **target** of the proposed platform: it is not implemented yet, and each value will be checked against the requirements and the verification plan.
 
-| Evaluation Criteria | Google Safe Browsing | PhishTank | Kaspersky Anti-Phishing | ScamAdviser | Apache SpamAssassin | **Proposed Solution** |
+| Evaluation Criteria | Google Safe Browsing | Google Messages Scam Detection | Kaspersky Anti-Phishing | Bitdefender Scamio | Apache SpamAssassin | **Proposed Solution (target)** |
 |:---|:---:|:---:|:---:|:---:|:---:|:---:|
-| **1. Text Message Analysis (SMS / Email Body)** | ❌ | ❌ | ⚠️ | ❌ | ⚠️ | ✅ |
-| **2. Use of Machine Learning** | ✅ | ❌ | ✅ | ⚠️ | ⚠️ | ✅ |
+| **1. Text Message Analysis (SMS / Email Body)** | ❌ | ✅ | ⚠️ | ✅ | ⚠️ | ✅ |
+| **2. Use of Machine Learning** | ✅ | ✅ | ✅ | ✅ | ⚠️ | ✅ |
 | **3. Open-Source Availability** | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
-| **4. Multilingual Support (incl. Kazakh/Russian)** | ⚠️ | ❌ | ⚠️ | ⚠️ | ⚠️ | ✅ |
-| **5. Free to Use** | ✅ | ✅ | ❌ | ⚠️ | ✅ | ✅ |
-| **6. API for Integration** | ✅ | ✅ | ⚠️ | ✅ | ✅ | ✅ |
-| **7. Real-Time Analysis Capability** | ✅ | ⚠️ | ✅ | ✅ | ✅ | ✅ |
-| **8. Explainability of Results** | ⚠️ | ⚠️ | ⚠️ | ✅ | ⚠️ | ✅ |
-| **9. User-Friendly Web Interface** | ⚠️ | ⚠️ | ⚠️ | ✅ | ❌ | ✅ |
-| **10. Support for Multiple Message Types** | ❌ | ❌ | ⚠️ | ❌ | ⚠️ | ✅ |
+| **4. Multilingual Support (incl. Kazakh/Russian)** | ⚠️ | ❌ | ⚠️ | ⚠️ | ⚠️ | ⚠️ |
+| **5. Free to Use** | ⚠️ | ✅ | ❌ | ✅ | ✅ | ✅ |
+| **6. API for Integration** | ✅ | ❌ | ⚠️ | ❌ | ✅ | ✅ |
+| **7. Real-Time Analysis Capability** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **8. Explainability of Results** | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ✅ |
+| **9. User-Friendly Web Interface** | ⚠️ | ❌ | ⚠️ | ✅ | ❌ | ✅ |
+| **10. Support for Multiple Message Types** | ❌ | ⚠️ | ⚠️ | ✅ | ⚠️ | ⚠️ |
+
+For the proposed solution, C4 is partial because English is the baseline and Russian/Kazakh are planned as FR-9 (Could). C10 is partial because the web form and the Telegram bot are planned first, while the SMS application is a prototype.
 
 ### Summary Scorecard
 
-| System | ✅ Full Support | ⚠️ Partial Support | ❌ No Support | Overall Viability for Multi-Channel Text Scam Detection |
+| System | ✅ Full Support | ⚠️ Partial Support | ❌ No Support | Main limitation for our task |
 |:---|:---:|:---:|:---:|:---|
-| **Google Safe Browsing** | 4 | 3 | 3 | **Low** (URL-restricted; non-textual) |
-| **PhishTank** | 2 | 3 | 5 | **Low** (URL-restricted; crowd-dependent) |
-| **Kaspersky Anti-Phishing** | 3 | 5 | 2 | **Moderate** (Powerful, but commercial & closed) |
-| **ScamAdviser** | 4 | 3 | 3 | **Low–Moderate** (Domain-only; excellent UI/explainability) |
-| **Apache SpamAssassin** | 4 | 4 | 2 | **Moderate** (Email-only; lacks modern NLP & web UI) |
-| **Proposed Solution** | **10** | **0** | **0** | **Optimal** (Engineered to resolve all identified gaps) |
+| **Google Safe Browsing** | 3 | 4 | 3 | Checks URLs only |
+| **Google Messages Scam Detection** | 4 | 2 | 4 | One app, English only, no API |
+| **Kaspersky Anti-Phishing** | 2 | 6 | 2 | Paid and closed, no standalone text check |
+| **Bitdefender Scamio** | 6 | 2 | 2 | Closed, no API, account required |
+| **Apache SpamAssassin** | 4 | 5 | 1 | Email only, no interface for end users |
+
+Scamio is the closest existing system to our idea. The difference of the proposed platform is not the ability to check text as such, but the combination of an open and reproducible model, a public API for channel adapters, an explanation built from the model's features, and a focus on Kazakhstan.
 
 ---
 
 ## 5. Comparative Gap Analysis
 
-A rigorous examination of the comparative matrix reveals several critical systemic gaps in the contemporary cybersecurity landscape:
-
 ```
 +-----------------------------------------------------------------------------+
-|                             EXISTING PARADIGMS                              |
+|                             EXISTING APPROACHES                             |
 +-----------------------------------------------------------------------------+
-|  Domain / URL Scanners       |  Server-Side Email Filters | Commercial Suites
-|  (Safe Browsing, PhishTank,  |  (Apache SpamAssassin)     | (Kaspersky)
-|   ScamAdviser)               |                            |
-|                              |                            |
-|  - URL-only scope            |  - Email RFC only          | - Commercial / Closed
-|  - Miss linkless scams       |  - Naive Bayes / Regex     | - Black-box output
-|  - No conversational context |  - No web UI for users     | - No open web portal
+|  URL reputation          | Closed text-scam assistants | Email filters / AV  |
+|  (Safe Browsing)         | (Google Messages, Scamio)   | (SpamAssassin,      |
+|                          |                             |  Kaspersky)         |
+|  - URLs only             | - No public API             | - Email or installed|
+|  - Miss linkless scams   | - Model cannot be audited   |   product only      |
+|                          | - Kazakh not documented     | - Technical output  |
 +-----------------------------------------------------------------------------+
                                       │
                                       ▼
 +-----------------------------------------------------------------------------+
-|                              THE CRITICAL GAP                               |
+|                                THE GAP                                      |
 +-----------------------------------------------------------------------------+
-|   No existing tool combines:                                                |
-|   1. Deep NLP text understanding (SMS, email body, messengers)              |
-|   2. Multilingual fluency in regional languages (Kazakh & Russian)          |
-|   3. Transparent, educational explainability for everyday users             |
-|   4. Completely free, open-source web and API accessibility                 |
-+-----------------------------------------------------------------------------+
-                                      │
-                                      ▼
-+-----------------------------------------------------------------------------+
-|                              PROPOSED SOLUTION                              |
-+-----------------------------------------------------------------------------+
-|  Intelligent Web Platform for Fraudulent Message Analysis and Prevention    |
-|  - Cross-channel text normalization (SMS, Telegram, Email)                 |
-|  - Fine-tuned NLP models (Transformer / Classical Ensemble)                 |
-|  - Human-interpretable risk breakdown & manipulative phrase highlighting     |
-|  - 100% Free, Open-Source, Modern React Web UI + FastAPI Service            |
+|   No reviewed tool combines:                                                |
+|   1. Analysis of message text from different channels                       |
+|   2. An open, reproducible model with a public API                          |
+|   3. An explanation that an ordinary user can understand                    |
+|   4. Attention to the Kazakhstan context (Russian and Kazakh messages)      |
 +-----------------------------------------------------------------------------+
 ```
 
-### 5.1. The URL-Centricity Fallacy
-Existing threat intelligence (Google Safe Browsing, PhishTank, ScamAdviser) is overwhelmingly oriented toward URL and domain verification. While indispensable for blocking known malicious infrastructure, this model fails entirely against modern social engineering techniques that do not rely on immediate hyperlinks:
-- **Direct financial coercion:** Urgent messages urging victims to execute peer-to-peer bank transfers (e.g., via Kaspi QR or phone number) under the guise of an erroneous transfer, legal threat, or family emergency.
-- **Verification code harvesting:** Messages deceiving recipients into sharing incoming one-time SMS verification passwords (OTP).
-- **Secondary platform redirection:** Communications asking users to initiate contact via personal numbers or private messaging channels where URL filters do not intervene.
+### 5.1. Scams without links
+URL reputation services cannot help when a message has no link at all. Typical examples are:
+- **Direct money requests:** urgent messages asking to transfer money by phone number or QR code under the pretext of an erroneous transfer, a legal threat or a family emergency.
+- **Verification code harvesting:** messages that make the recipient share a one-time SMS code.
+- **Moving the conversation elsewhere:** requests to continue the conversation by phone or in a private messenger chat.
 
-### 5.2. Linguistic and Regional Blind Spots (Central Asian Context)
-The dominant open-source and commercial threat detection engines are heavily biased toward English-language datasets and Western corporate attack profiles. In Kazakhstan and the broader Central Asian region, cybercriminals heavily utilize:
-- Russian language social engineering tailored to regional municipal and financial contexts (e.g., impersonations of Kaspi Bank, Halyk Bank, Kazpost, or eGov.kz).
-- Kazakh language text containing deceptive lures, often exhibiting dialectal variations, grammatical irregularities, or mixed Russian-Kazakh code-switching ("surzhyk").
-- Cyrillic-to-Latin transliterations designed specifically to evade static regex filters.
-Existing global tools lack fine-tuned tokenizers, annotated corpora, and contextual sensitivity for these regional linguistic nuances.
+Text-based tools such as Google Messages Scam Detection and Scamio address this problem, which confirms that analysing message text is the right direction.
 
-### 5.3. The Black-Box Interpretability Problem
-Security tools such as Google Safe Browsing and commercial endpoint antiviruses output binary verdicts (`Safe` vs. `Malicious`). While sufficient for automated firewall drops, this approach does not enhance user digital literacy. Non-technical users are left uninformed regarding:
-- *Why* the message was deemed fraudulent.
-- *Which* linguistic expressions signaled manipulative psychological pressure (e.g., artificial urgency, false authority, unrealistic financial gain).
-- *What* concrete defensive actions should be taken.
-Conversely, tools with explainable output like SpamAssassin provide raw configuration flags (`SPF_FAIL`, `URIBL_BLACK`) that are indecipherable to ordinary citizens.
+### 5.2. Regional and language context
+None of the reviewed tools documents support for Kazakh, and Google Messages Scam Detection was launched for English only [2]. Scam messages in Kazakhstan are often written in Russian, in Kazakh or in a mix of both, and impersonate local banks, delivery services or government services. These observations are preliminary assumptions and are checked in the relevance study (user survey); the first version of the model is trained on English data, and Russian and Kazakh support is planned as FR-9.
 
-### 5.4. Architectural Fragmentation and Usability Barriers
-Apache SpamAssassin delivers robust rule customization and open-source sovereignty, but requires Linux server administration skills, manual configuration file editing, and dedicated mail transfer agent integration. Conversely, consumer-friendly web platforms like ScamAdviser are strictly commercial and domain-constrained. There is a lack of accessible, unified web platforms where an ordinary smartphone user can provide a suspicious Telegram message or SMS and receive an instantaneous, comprehensible security appraisal.
+### 5.3. Black-box results
+Most tools return a verdict or a warning without reasons. SpamAssassin does list the triggered rules (`BAYES_99`, `URIBL_BLACK`), but these names mean nothing to an ordinary user. A user who understands *why* a message is dangerous is better prepared for the next attempt.
+
+### 5.4. Openness and integration
+The text-scam assistants are closed products without a public API, so their result cannot be used by other applications and their quality cannot be checked independently. SpamAssassin is open but requires server administration and works only with email.
 
 ---
 
 ## 6. Justification for the Proposed Solution
 
-The structural and functional deficiencies identified in the comparative review substantiate the academic necessity and practical urgency of developing the **Intelligent Web Platform for Scam Message Analysis and Prevention**.
+The proposed platform addresses these gaps within the scope defined in the project proposal.
 
-The proposed platform is engineered specifically to eliminate these critical gaps by uniting advanced machine learning, cross-channel text processing, regional linguistic modeling, and accessible web engineering.
-
-### 6.1. Core Architectural Pillars
+### 6.1. Core Components
 
 ```
 +-------------------------------------------------------------------------------+
-|                           PROPOSED PLATFORM ARCHITECTURE                      |
-+-------------------------------------------------------------------------------+
-|  1. Ingestion Layer                                                           |
-|     - Text Input: SMS, Telegram, Email Body                                  |
-|     - URL & Metadata Extraction: Auxiliary link extraction and domain check   |
+|  1. Input                                                                     |
+|     - Web form (core MVP)                                                     |
+|     - Ingestion API for the Telegram bot and the SMS application (planned)    |
 +-------------------------------------------------------------------------------+
                                       │
                                       ▼
 +-------------------------------------------------------------------------------+
-|  2. NLP & Processing Pipeline                                                 |
-|     - Text Normalization: De-obfuscation, transliteration handling            |
-|     - Multilingual Tokenizer: Native English, Russian, Kazakh vocabularies    |
-|     - Machine Learning Inference: Transformer-based intent & scam classifier  |
-|     - Heuristic & Pattern Engine: Urgency, authority, banking fraud triggers  |
+|  2. ML service (Python, FastAPI)                                              |
+|     - Text normalisation (URLs, emails, phone numbers)                        |
+|     - TF-IDF features + classical classifier (Logistic Regression baseline)   |
+|     - Rule-based indicators: urgency, links, money and code requests          |
 +-------------------------------------------------------------------------------+
                                       │
                                       ▼
 +-------------------------------------------------------------------------------+
-|  3. Interpretability & Explainability Module                                  |
-|     - Risk Score Calculation (0 - 100%)                                       |
-|     - Attention/Keyword Highlighting (Interactive visual tags)                |
-|     - Plain-Language Threat Summary & Actionable Recommendations              |
+|  3. Explanation and risk policy (Go backend)                                  |
+|     - Risk level: safe / suspicious / fraudulent                              |
+|     - Top features and indicators shown to the user                           |
+|     - Plain-language warning and safety advice                                |
 +-------------------------------------------------------------------------------+
                                       │
                                       ▼
 +-------------------------------------------------------------------------------+
-|  4. Delivery & Accessibility Layer                                            |
-|     - Modern Responsive Web UI (React / Tailwind CSS)                         |
-|     - High-Performance Asynchronous REST API (FastAPI / OpenAPI)              |
-|     - Open-Source Academic Repository (Full auditability & reproducibility)   |
+|  4. Delivery                                                                  |
+|     - React web interface                                                     |
+|     - Documented REST API (OpenAPI)                                           |
+|     - Public repository with code, data description and evaluation results    |
 +-------------------------------------------------------------------------------+
 ```
 
-### 6.2. Detailed Functional Advantages
+### 6.2. Differences from the Reviewed Systems
 
-#### 1. Unified Multi-Modal Text Ingestion (SMS, Email, Messengers)
-Unlike SpamAssassin (which demands RFC 5322 email headers) or URL-only verifiers (Google Safe Browsing, PhishTank, ScamAdviser), the proposed platform provides an agnostic text ingestion engine. It standardizes informal SMS messages, conversational instant messaging logs, and traditional email bodies into a unified semantic representation, isolating both linguistic cues and secondary web indicators.
+#### 1. Text from different channels
+Unlike URL services and email filters, the platform accepts plain message text from the web form and, through one ingestion API, from the Telegram bot and the SMS application. The same model is used for every channel.
 
-#### 2. Advanced Machine Learning and Contextual Semantic Processing
-Rather than relying solely on rigid regex signatures or basic Naive Bayes token frequencies, the proposed solution employs modern NLP models. By leveraging deep contextual sentence representations and fine-tuned transformer architectures, the system captures semantic nuance, semantic manipulation, and obfuscated phrasing that evade traditional static filters.
+#### 2. Open and reproducible model
+Unlike Google Messages and Scamio, the model, the training script and the evaluation results are kept in the public repository, so the quality can be checked and compared with baselines (see the verification plan).
 
-#### 3. Native Multilingual Support Tailored to the Regional Context
-The platform is intentionally trained and validated on multilingual datasets encompassing English, Russian, and Kazakh. It provides dedicated preprocessing pipelines to normalize Cyrillic homoglyph obfuscation (punycode/lookalike substitution attacks) and handles regional linguistic constructs typical of scam campaigns in the Republic of Kazakhstan (e.g., fraudulent social benefits, banking verification scams, and delivery notification deceptions).
+#### 3. Explanation for ordinary users
+A linear model on TF-IDF features shows which words and phrases influenced the decision. Together with rule-based indicators (urgency, suspicious link, request for money or a code) the user gets a short explanation and advice instead of a bare verdict.
 
-#### 4. Human-Interpretable Diagnostics and Digital Hygiene
-Addressing the black-box limitations of commercial solutions, the platform introduces an interpretability layer. Utilizing attention weights and feature contribution indicators, it highlights specific suspicious phrases (e.g., *"Срочно подтвердите операцию"*, *"Шұғыл түрде растаңыз"*, *"Account suspended within 24 hours"*), categorizes the scam typology (smishing, fake banking, lottery fraud), and supplies concrete, educational guidance to help the user avoid future exploitation.
+#### 4. Public API
+Unlike the closed text-scam assistants, the platform has a documented REST API, which is used by the channel adapters and can be used by other applications.
 
-#### 5. Open-Source Sovereignty and Zero-Cost Accessibility
-By adopting an open-source development methodology, the platform ensures total algorithmic transparency, reproducible academic research, and zero barrier to entry. End-users receive a lightweight, responsive web interface requiring no software installation or registration, while developers and educational institutions obtain a fully documented REST API for integration into secondary security workflows.
+#### 5. Kazakhstan context
+The first model is trained on English data. Russian and Kazakh support is a planned extension (FR-9) and is evaluated separately for each language.
 
 ---
 
 ## 7. Conclusion
 
-A systematic analysis of existing threat prevention platforms demonstrates that while URL scanners (Google Safe Browsing, PhishTank, ScamAdviser), commercial endpoint modules (Kaspersky), and traditional email filters (Apache SpamAssassin) fulfill important niche functions, none provides a comprehensive, free, and explainable text scam detection solution for everyday communication channels.
-
-The proposed **Intelligent Web Platform for Scam Message Analysis and Prevention** resolves this fragmentation. By bridging natural language processing, regional multilingual modeling (Kazakh, Russian, and English), actionable explainability, and accessible web engineering, the platform establishes an effective, human-centered defense against the evolving spectrum of social engineering threats.
+URL reputation services (Google Safe Browsing), commercial protection (Kaspersky), email filters (Apache SpamAssassin) and closed text-scam assistants (Google Messages Scam Detection, Bitdefender Scamio) each cover part of the problem. None of them offers an open, explainable text analysis with a public API that can be used from the web and from messaging channels. The proposed platform targets exactly this combination; whether the targets in Section 4 are reached will be shown by the evaluation described in the verification plan.
 
 ---
 
 ## References
 
-1. **Google LLC.** (2024). *Google Safe Browsing Technology and Developer Documentation*. https://developers.google.com/safe-browsing
-2. **Cisco Systems & PhishTank.** (2024). *PhishTank: An Anti-Phishing Clearinghouse*. https://phishtank.org
-3. **Kaspersky Lab.** (2024). *Kaspersky Security Network: Threat Intelligence and Anti-Phishing Technologies*. White Paper, Kaspersky Security Bulletin.
-4. **Ecommerce Foundation.** (2024). *ScamAdviser: Methodology of Algorithmic Website Trust Scoring*. https://www.scamadviser.com
-5. **Apache Software Foundation.** (2024). *Apache SpamAssassin Architecture and Rule Verification Manual*. https://spamassassin.apache.org
-6. **Altynbekov, N., & Serek, A.** (2023). *Analysis of Social Engineering and Phishing Attack Trends in Central Asia: The Case of Kazakhstan*. Journal of Cybersecurity and Information Security, 12(3), 145–159.
-7. **Zhang, W., & Gao, Q.** (2022). *Comparative Evaluation of Machine Learning and Deep Learning Techniques for Text-Based Smishing and Phishing Detection*. ACM Computing Surveys (CSUR), 55(4), 1–37.
+1. Google. (n.d.). *Safe Browsing APIs*. Google for Developers. Retrieved October 23, 2026, from https://developers.google.com/safe-browsing
+2. Google. (2025, March 4). *New AI-powered scam detection features to help protect you on Android*. The Keyword. https://blog.google/security/new-ai-powered-scam-detection-features/
+3. Kaspersky. (n.d.). *Kaspersky Security Network*. Retrieved October 23, 2026, from https://www.kaspersky.com/enterprise-security/wiki-section/products/kaspersky-security-network
+4. Bitdefender. (n.d.). *Bitdefender Scamio*. Retrieved October 23, 2026, from https://www.bitdefender.com/consumer/scamio
+5. The Apache Software Foundation. (n.d.). *Apache SpamAssassin*. Retrieved October 23, 2026, from https://spamassassin.apache.org/
+6. Kaspersky. (2025, September 4). *Kaspersky Premium earns Approved certificate from AV-Comparatives for high anti-phishing results* [Press release]. https://www.kaspersky.com/about/press-releases/kaspersky-premium-earns-approved-certificate-from-av-comparatives-for-high-anti-phishing-results
