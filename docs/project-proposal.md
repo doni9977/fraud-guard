@@ -20,7 +20,7 @@
 ---
 
 ## Problem Statement
-The proliferation of digital communication channels has led to an unprecedented increase in fraudulent messages across electronic communications, including phishing emails, smishing (SMS phishing), and sophisticated social engineering schemes distributed through instant messengers. According to data published by the Anti-Phishing Working Group (APWG), phishing and social engineering attacks have reached record highs in recent years, inflicting substantial financial and personal data losses on individuals and organizations alike.
+The proliferation of digital communication channels has led to an unprecedented increase in fraudulent messages across electronic communications, including phishing emails, smishing (SMS phishing), and sophisticated social engineering schemes distributed through instant messengers. The Anti-Phishing Working Group (APWG) observed about 3.8 million phishing attacks in 2025, slightly more than in 2024, and reports that the use of SMS for phishing kept growing at the end of 2025 [1].
 
 Ordinary users frequently lack the requisite cybersecurity literacy and technical background to reliably recognize subtle indicators of social engineering, deceptive links, spoofed headers, and manipulative language patterns. Concurrently, existing enterprise-grade fraud detection solutions are predominantly embedded into proprietary, high-cost corporate security suites or email gateway appliances, rendering them inaccessible to everyday individuals and small businesses. 
 
@@ -45,7 +45,7 @@ The primary aim of this diploma project is to design, develop, and deploy an int
 ## Objectives
 To fulfill the stated aim, the project encompasses the following academic and technical objectives:
 1. **Literature & State-of-the-Art Review:** Conduct a comprehensive review of contemporary fraud detection methodologies, natural language processing architectures, and existing anti-phishing platforms.
-2. **Data Acquisition and Preparation:** Gather, curate, normalize, and label a balanced corpus of legitimate, suspicious, and fraudulent text messages across email, SMS, and messenger modalities.
+2. **Data Acquisition and Preparation:** Gather, curate and normalize public corpora of legitimate and fraudulent text messages (SMS, email, messenger), and prepare a small manually labelled set with all three risk classes (safe, suspicious, fraudulent) to check the risk thresholds.
 3. **Model Development and Optimization:** Train, tune, and benchmark multiple ML/NLP classification models (e.g., TF-IDF baseline with classifiers, transformer-based representations) to optimize predictive accuracy and generalization.
 4. **Backend Architecture & API Implementation:** Design and implement a high-throughput, secure RESTful API backend utilizing Go, responsible for request lifecycle management, database transactions, and integration pipelines.
 5. **Frontend Interface Engineering:** Construct a modern, intuitive, responsive user interface utilizing React and TypeScript to facilitate frictionless user submissions and insightful visual feedback.
@@ -58,8 +58,8 @@ To fulfill the stated aim, the project encompasses the following academic and te
 
 ## Expected Outcomes
 The key deliverables and outcomes expected upon project completion include:
-- **Trained Machine Learning Model:** A robust text classification pipeline capable of categorizing incoming texts into safe, suspicious, or fraudulent categories with a target macro $F_1\text{-score} \ge 0.85$.
-- **Production-Ready RESTful API:** A performant Go backend exposing well-documented endpoints for asynchronous message processing, analysis history, and administrative analytics.
+- **Trained Machine Learning Model:** A robust text classification pipeline capable of estimating the fraud probability of a message and mapping it to safe, suspicious, or fraudulent risk levels, with a target macro $F_1\text{-score} \ge 0.85$ on the test split.
+- **Production-Ready RESTful API:** A performant Go backend exposing well-documented endpoints for message analysis, external message ingestion, analysis history, and administrative analytics.
 - **Responsive Web Application:** An accessible, user-friendly client application providing detailed risk breakdowns, confidence scores, and visual threat explanations.
 - **Integration-Ready Ingestion API:** A documented contract for web submissions and external SMS or Telegram adapters. At least one adapter may be delivered as a working prototype if platform constraints permit.
 - **Prevention Workflow:** Risk-based warnings and safety recommendations; the system does not silently delete or block messages.
@@ -84,3 +84,8 @@ The key deliverables and outcomes expected upon project completion include:
 - **Full-Scale Mobile Product:** A production mobile security suite with broad device support is outside the current release. A limited SMS companion prototype may be used as an integration client.
 - **Telecom-Level Integration:** Direct access to operator SMS gateways, carrier infrastructure, or hidden interception is outside the project.
 - **Unauthorized Private-Chat Monitoring:** The Telegram bot only processes messages explicitly sent or forwarded by the user; it does not read private chats in the background.
+
+---
+
+## References
+1. Anti-Phishing Working Group. (2026). *Phishing Activity Trends Report, 4th Quarter 2025*. https://docs.apwg.org/reports/apwg_trends_report_q4_2025.pdf
