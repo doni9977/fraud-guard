@@ -32,16 +32,16 @@ The functional requirements define the specific operational behaviors, automated
 | ID | Requirement | Description | Priority | Acceptance Criteria |
 | :--- | :--- | :--- | :---: | :--- |
 | **FR-1** | Message Submission | User can paste or type a text message and submit it for analysis via the user interface. | **Must** | 1. Text input field accepts between 1 and 10,000 characters.<br>2. Submit button triggers client-side validation and backend dispatch.<br>3. Input sanitization prevents injection attacks while preserving linguistic markers. |
-| **FR-2** | ML-Based Classification | System classifies submitted message using a trained machine learning model into risk categories. | **Must** | 1. Classifies message into one of three predefined classes: *Safe*, *Suspicious*, or *Fraudulent*.<br>2. Computes and returns a confidence score normalized between 0% and 100%.<br>3. End-to-end inference execution completes within 3 seconds. |
+| **FR-2** | ML-Based Classification | System classifies submitted message using a trained machine learning model into risk categories. | **Must** | 1. Classifies message into one of three predefined classes: *Safe*, *Suspicious*, or *Fraudulent*.<br>2. Computes and returns a confidence score normalized between 0% and 100%.<br>3. The class is derived from the model's fraud probability: P < 0.30 → *Safe*, 0.30 ≤ P < 0.70 → *Suspicious*, P ≥ 0.70 → *Fraudulent* (thresholds are tuned on the validation set and documented in the verification plan).<br>4. Server-side processing completes within 2 seconds at the 95th percentile (see NFR-1). |
 | **FR-3** | Result Explanation | System provides an interpretable explanation detailing why a message was assigned a specific classification. | **Must** | 1. Highlights at least 3 key indicators or features (e.g., urgency cues, credential harvesting links, manipulative linguistic patterns).<br>2. Presents human-readable rationales alongside visual risk severity indicators. |
 | **FR-4** | Analysis History | User can view their previous message analyses within the application interface. | **Should** | 1. Retains and displays the last 50 analyses for the active session or authenticated user profile.<br>2. Displays timestamp, risk classification, confidence score, and truncated snippet for each record. |
 | **FR-5** | REST API | Public API endpoint for programmatic message submission and automated analysis. | **Should** | 1. Standardized JSON REST endpoint (`/api/v1/analyze`) accepting payload schema.<br>2. Comprehensive OpenAPI / Swagger 3.0 specification available.<br>3. API key authentication supported with valid credential verification. |
 | **FR-6** | User Registration & Authentication | Users can create accounts and authenticate securely to preserve longitudinal analysis history. | **Could** | 1. Email-based registration with password hashing (bcrypt / Argon2).<br>2. JSON Web Token (JWT) based session management and authorization.<br>3. Secure password recovery and profile management workflows. |
 | **FR-7** | Feedback Mechanism | Users can report incorrect or contested classifications to support active learning. | **Could** | 1. Interface contains an interactive "Report Misclassification" or rating widget.<br>2. Discrepancy reports and optional corrected labels are securely recorded in the database for continuous model re-training. |
 | **FR-8** | Dashboard | Overview of aggregated platform analytics and fraud detection telemetry. | **Could** | 1. Administrative or analytical dashboard visualizing total analyses conducted.<br>2. Real-time metric displays: fraud detection percentage rate, average confidence scores, and historical temporal trends. |
-| **FR-9** | Multi-language Input | Accept and accurately classify messages submitted in English, Russian, and Kazakh. | **Should** | 1. Robust multilingual tokenization and feature extraction handling English, Russian (Cyrillic), and Kazakh (Cyrillic and Latin script variants).<br>2. Consistent classification performance across all three supported languages. |
+| **FR-9** | Multi-language Input | Accept and classify messages in Russian and Kazakh in addition to the English baseline. | **Could** | 1. Tokenization and feature extraction handle Russian (Cyrillic) and Kazakh (Cyrillic and Latin script variants).<br>2. Precision, recall and F1 are reported separately for each supported language. |
 | **FR-10** | Batch Analysis | Upload and process multiple messages simultaneously via file batching. | **Could** | 1. File uploader supports CSV and plain TXT file formats containing multiple text entries.<br>2. System executes bulk inference and provides downloadable structured reports (CSV/JSON). |
-| **FR-11** | External Message Ingestion | Receive normalized messages from an SMS application or Telegram bot through a protected API contract. | **Should** | 1. Payload includes message text, source channel, received time, and optional sender metadata.<br>2. The same ML pipeline is used for web and external-channel messages.<br>3. Duplicate delivery is handled idempotently. |
+| **FR-11** | External Message Ingestion | Receive normalized messages from an SMS application or Telegram bot through a protected API contract. | **Should** | 1. `POST /api/v1/messages/ingest` accepts message identifier, message text, source channel, received time, and optional sender metadata.<br>2. The same ML pipeline is used for web and external-channel messages.<br>3. Repeated delivery of the same source and message identifier does not create a second analysis (idempotency). |
 | **FR-12** | Risk Notification | Warn the user when an analyzed message is classified as high risk. | **Should** | 1. Web results display risk level, reasons, and safety advice.<br>2. An implemented adapter can return the warning to its channel.<br>3. The system does not delete or block the original message. |
 
 ---
@@ -81,8 +81,8 @@ The platform requirements are structured according to the industry-standard **Mo
   │     MUST HAVE     │                   │    SHOULD HAVE    │
   │ • FR-1: Submit    │                   │ • FR-4: History   │
   │ • FR-2: Classify  │                   │ • FR-5: REST API  │
-  │ • FR-3: Explain   │                   │ • FR-9: Multiling │
-  │ • NFR-1 to NFR-10 │                   │                   │
+  │ • FR-3: Explain   │                   │ • FR-11: Ingest   │
+  │ • NFR-1 to NFR-10 │                   │ • FR-12: Warning  │
   └───────────────────┘                   └───────────────────┘
             │                                       │
             ▼                                       ▼
@@ -91,7 +91,8 @@ The platform requirements are structured according to the industry-standard **Mo
   │ • FR-6: Auth/User │                   │ • Multimodal OCR  │
   │ • FR-7: Feedback  │                   │ • Telecom Sniffer │
   │ • FR-8: Dashboard │                   │ • Native iOS/Andr │
-  │ • FR-10: Batch    │                   │ • Hidden Monitoring│
+  │ • FR-9: Multiling │                   │ • Hidden Monitoring│
+  │ • FR-10: Batch    │                   │                   │
   └───────────────────┘                   └───────────────────┘
 ```
 
@@ -106,15 +107,15 @@ The system cannot be considered minimally viable or defensible as a diploma deli
 Substantial enhancements critical to fulfilling the full academic and practical scope:
 - **FR-4 (Analysis History):** Empowers users to inspect recent evaluations, compare risk assessments, and track suspicious communications over time.
 - **FR-5 (REST API):** Enables third-party integration, external script queries, and programmatic testing with OpenAPI specification and API key enforcement.
-- **FR-9 (Multi-language Input):** Broadens the platform's utility in the target demographic by accepting English, Russian, and Kazakh languages.
+- **FR-11/FR-12 (Channel Extension):** Provides a common ingestion contract and risk-warning workflow for the planned SMS and Telegram adapters. The web MVP works without them; if a real channel cannot be finished, the same flow is shown with a test adapter.
 
 ### 4.3 Could Have (Desirable Enhancements)
 Features that expand user experience and system utility if sprint velocity permits:
 - **FR-6 (User Registration / Authentication):** Grants long-term personalized account state and cross-device history persistence via JWT.
 - **FR-7 (Feedback Mechanism):** Closes the continuous improvement loop by collecting user verification labels to augment dataset quality.
 - **FR-8 (Dashboard):** Visualizes system-wide throughput, threat distribution metrics, and model performance trends.
+- **FR-9 (Multi-language Input):** Extends the English baseline to Russian and Kazakh messages, which matter for users in Kazakhstan. Planned after the English model is evaluated.
 - **FR-10 (Batch Analysis):** Accommodates bulk CSV/TXT processing for institutional helpdesk or research evaluations.
-- **FR-11/FR-12 (Channel Extension):** Provides a common ingestion contract and risk-warning workflow for the planned SMS and Telegram adapters when implementation time and platform access permit.
 
 ### 4.4 Won't Have (Explicit Out-of-Scope Items for Current Release)
 To prevent scope creep and maintain development focus:
@@ -128,18 +129,18 @@ To prevent scope creep and maintain development focus:
 ## 5. Traceability
 
 ### 5.1 Project Management Traceability Model
-To guarantee that academic goals and software engineering requirements are rigorously implemented, tested, and audited, every functional requirement (FR-1 through FR-12) and non-functional requirement (NFR-1 through NFR-10) is mapped to actionable work items within the team's project management system (**YouTrack**).
+To guarantee that academic goals and software engineering requirements are rigorously implemented, tested, and audited, every functional requirement (FR-1 through FR-12) and non-functional requirement (NFR-1 through NFR-10) is mapped to work items in the team's YouTrack project (DIP).
 
 ```
 ┌─────────────────────────────────┐
 │     Requirements Document       │
 │      (FR-1..12, NFR-1..10)      │
 └────────────────┬────────────────┘
-                 │ Traced via Issue Keys
+                 │ Traced via task IDs (DIP-n)
                  ▼
 ┌─────────────────────────────────┐
 │         YouTrack Tasks          │
-│    (User Stories / Epics)       │
+│         (DIP project)           │
 └────────────────┬────────────────┘
                  │ Implemented via Branches & Commits
                  ▼
@@ -157,27 +158,29 @@ To guarantee that academic goals and software engineering requirements are rigor
 
 ### 5.2 Traceability Mapping Matrix
 
-| Requirement ID | YouTrack Epic / Workstream | Target Architectural Component | Verification Method |
+Task IDs refer to the YouTrack project [DIP](https://fg-diploma.youtrack.cloud/projects/DIP). Requirements marked *backlog* get a task when they are planned.
+
+| Requirement ID | YouTrack Task | Target Architectural Component | Verification Method |
 | :--- | :--- | :--- | :--- |
-| **FR-1** | `CORE-UI-INPUT` | React Frontend (`MessageInput` component) | E2E Browser Testing, Form Validation Tests |
-| **FR-2** | `ML-INFERENCE-ENGINE` | Python ML Service (`fastapi`/`onnx`/`sklearn`) | Unit Benchmarks, Classification Metric Evaluation |
-| **FR-3** | `ML-EXPLAINABILITY` | Explainability Module (LIME / SHAP / Rule-based) | Output Inspection, Feature Attribution Coverage |
-| **FR-4** | `DATA-STORE-HIST` | Go Backend & PostgreSQL Schema | Repository Integration Tests, Query Profiling |
-| **FR-5** | `API-GATEWAY-PUB` | Go HTTP Router (`chi` / `gin`) & OpenAPI Spec | Automated OpenAPI Contract Tests, Postman Collection |
-| **FR-6** | `AUTH-SECURITY` | Go Auth Middleware & JWT Services | Security Pen-Testing, Token Expiry Unit Tests |
-| **FR-7** | `FEEDBACK-LOOP` | Feedback Controller & Annotation Database | Endpoint Integration Tests, Form Validation |
-| **FR-8** | `ANALYTICS-DASH` | Frontend Charting (`Chart.js`/`Recharts`) & API | Component Visual Tests, Aggregation Query Tests |
-| **FR-9** | `ML-NLP-MULTILANG` | Multilingual Tokenizer & ML Pipeline | Trilingual Precision/Recall Test Suites |
-| **FR-10**| `BATCH-PROCESS` | Async Worker Pool & Multipart Form Parser | Bulk Load Ingestion Tests, Format Validation |
-| **FR-11**| `CHANNEL-INGEST` | Go Ingestion API and Channel Adapters | Adapter Contract and Idempotency Tests |
-| **FR-12**| `RISK-NOTIFY` | Risk Policy and Notification UI | High-Risk Warning Integration Tests |
-| **NFR-1** | `PERF-OPTIMIZE` | Go Backend & Inference Service Gateway | Load Testing (`k6` / `Vegeta`) under simulated loads |
-| **NFR-2** | `INFRA-SRE` | Cloud Orchestration (Render / Railway / Vercel) | Uptime Monitoring (`BetterStack` / `UptimeRobot`) |
-| **NFR-3** | `SCALE-CONCURR` | Go Goroutines & Concurrency Handlers | Stress Testing with 100+ simulated users |
-| **NFR-4** | `SEC-RATELIMIT` | Rate Limiter Middleware (`tollbooth` / Redis) | Rate Limiter Unit Tests, Automated Flooding Tests |
-| **NFR-5** | `SEC-TLS` | Edge Routing & TLS Configuration | SSL Labs Evaluation, Automated Header Inspections |
-| **NFR-6** | `PRIV-ZERO-RET` | In-Memory Processing & Scrubbing Pipeline | Memory Profiling, Database Persistence Auditing |
-| **NFR-7** | `UI-RESPONSIVE` | Tailwind CSS Responsive Breakpoint Rules | Cross-device Viewport Emulation, Lighthouse Audits |
-| **NFR-8** | `UI-A11Y` | Accessible UI Design System | Automated Axe-Core Audits, Keyboard Navigation QA |
-| **NFR-9** | `DEVOPS-CICD` | GitHub Actions Workflows | Automated CI Pipeline Execution on Pull Requests |
-| **NFR-10**| `QA-COVERAGE` | Test Runner & Coverage Reporters | Automated Codecov / Coveralls Enforcement ($\ge 70\%$) |
+| **FR-1** | DIP-20 | React Frontend (`MessageInput` component) | E2E Browser Testing, Form Validation Tests |
+| **FR-2** | DIP-14, DIP-15, DIP-16 | Python ML Service (`fastapi`/`sklearn`) | Classification metrics on the test split |
+| **FR-3** | DIP-16 | Explainability Module (top-k TF-IDF features + rule-based indicators) | Output Inspection, Indicator Tests |
+| **FR-4** | DIP-18, DIP-21 | Go Backend & PostgreSQL Schema | Repository Integration Tests |
+| **FR-5** | DIP-19 | Go HTTP Router (Gin) & OpenAPI Spec | OpenAPI Contract Tests, Postman Collection |
+| **FR-6** | backlog | Go Auth Middleware & JWT Services | Security Tests, Token Expiry Unit Tests |
+| **FR-7** | backlog | Feedback endpoint & `feedback` table | Endpoint Integration Tests |
+| **FR-8** | backlog | Frontend charts & aggregation API | Aggregation Query Tests |
+| **FR-9** | backlog | Multilingual tokenizer & ML pipeline | Per-language Precision/Recall |
+| **FR-10** | backlog | Batch upload endpoint | Format Validation Tests |
+| **FR-11** | DIP-22, DIP-24 | Go Ingestion API and channel adapters | Adapter Contract and Idempotency Tests |
+| **FR-12** | DIP-19, DIP-20 | Risk Policy and warning UI | High-Risk Warning Integration Tests |
+| **NFR-1** | DIP-19 | Go Backend & ML Service | Load Testing (`k6`) |
+| **NFR-2** | DIP-17, DIP-23 | Health endpoints, hosting (Render / Vercel) | Uptime Monitoring |
+| **NFR-3** | DIP-19 | Stateless Go handlers | Stress Testing with 100+ simulated users |
+| **NFR-4** | DIP-19 | Rate Limiter Middleware | Rate Limiter Unit Tests |
+| **NFR-5** | DIP-23 | Hosting TLS configuration | TLS and header checks |
+| **NFR-6** | DIP-18 | `analyses` table without raw text | Database Persistence Audit |
+| **NFR-7** | DIP-20, DIP-21 | Responsive layout | Viewport Emulation, Lighthouse |
+| **NFR-8** | DIP-20, DIP-21 | Accessible UI components | axe-core Audit, Keyboard Navigation |
+| **NFR-9** | DIP-23 | GitHub Actions Workflows | CI run on every Pull Request |
+| **NFR-10** | DIP-23 | Test runners & coverage reports | Coverage report ($\ge 70\%$) |
